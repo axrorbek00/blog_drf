@@ -1,0 +1,84 @@
+#version: "3.9"
+#services:
+#  app:
+#    build:
+#      context: .
+#    ports:
+#      - "8000:8000"
+#    volumes: # --> app papkalarni ulab beradi qppda qanday ozgariush kiritsam cantenirgayam ozgartiradi --
+#      - .:/app # chunki app dagi hama narsani kontenirdagi app degan papkaga kopiy qilganmiz
+#    command: >
+#      sh -c "python manage.py makemigrations && python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+#    env_file: .env
+#    depends_on:
+#      - django_db_2
+#
+#  django_db_2:
+#    image: postgres:15
+#    env_file: .env
+#    restart: unless-stopped
+#    volumes: #--> lokalhost bn contenirni ulab beradi
+#      - "postgres-data-2:/var/lib/postgresql/data/"
+#
+# pasgi celry taskalrni bowqarish uchun
+#  redis: # key valuey db
+#    image: redis:latest # image doker hubsan oxrgisini oladi
+#    restart: unless-stopped
+#    volumes: # redis-data qilib kampyutrga ulab qoyapti va volumsga oxrda qoshib qoyish kk redis-data ni
+      - "redis-data:/data"
+#    environment:
+#      - ALLOW_EMPTY_PASSWORD=yes
+#
+#  celery-worker:
+#    build: . # django un yozgan doker fileni ishlat degani
+#    image: django-docker-celery # bu image doker hubdan olinmaydi ruchnoy yozladi
+#    env_file: .env
+#    environment:
+#      - "DJANGO_DEBUG=true"
+#    restart: unless-stopped # toxtaguncha ishlatadi
+#    command: [ "celery", "-A", "conf", "worker", "--loglevel=info" ] # comandalar '-A'> qoshimcha kiritw mumkinligni bildradi
+#    # conf file, worker> ishchi iwga tushyabdi 1 ta ,  info darajadagi loglarni korsat degani
+#    depends_on: # db va redisga celery boglangan bu ikisi iwlamaguncha iwga tushmaydi
+#      - django_db_2
+#      - redis
+#    volumes:
+#      - "media-data:/var/www/media"
+#      - .:/app # bu django niki bn (app ichda yozilgan volumes:) birxil boladi 9 qatordagi
+#
+#
+## celery-beat kron job uchun yani doyimi takrorlanadgan iwlarni bajarish masalan tugilgan kunda tabrik sms kelwi
+## celery beat ni bowqa celery funksiyalardan farqi (worker) orniga (beat) yozladi
+#  celery-beat:
+#    build: .
+#    image: django-docker-beat
+#    env_file: .env
+#    environment:
+#      - "DJANGO_DEBUG=true"
+#    restart: unless-stopped
+#    command: [ "celery", "-A", "config", "beat", "--loglevel=info" ]
+#    depends_on:
+#      - django_db_2
+#      - redis
+#    volumes:
+#      - "media-data:/var/www/media"
+#      - .:/app
+#      - "celery-beat-data:/var/run/celery"
+#
+#  flower:
+#    build: .
+#    image: django-docker-flower
+#    env_file: .env
+#    command: [ "celery", "-A", "config", "flower",   "--port=5555" ]
+#    ports:
+#      - "5555:5555"
+#    depends_on:
+#      - redis
+
+
+#volumes: # qaysi volume larni iwlatganimni yozdim
+#  postgres-data-2:
+#  redis-data:
+#  media-data:
+#  celery-beat-data:
+
+
